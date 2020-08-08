@@ -169,7 +169,7 @@ function render(image_list) {
 	glCanvas = document.getElementById("glcanvas");
 	gl = glCanvas.getContext("webgl");
 	// Set the view port
-	gl.viewport(0,0, glCanvas.width, glCanvas.height);
+	//gl.viewport(0,0, glCanvas.width, glCanvas.height);
 	gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
 	//gl.enable(gl.DITHER);
 	gl.enable(gl.BLEND);
@@ -239,10 +239,6 @@ function render(image_list) {
 		gl.bindBuffer(gl.ARRAY_BUFFER, positionBufferList[i]);
 		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(rectangleCoordinates), gl.STATIC_DRAW);
 	}
-	
-
-	// Tell WebGL how to convert from clip space to pixels
-	gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 
 	// Clear the canvas
 	gl.clearColor(0, 0, 0, 1);
@@ -252,9 +248,6 @@ function render(image_list) {
 	gl.enableVertexAttribArray(texcoordLocation);
 	gl.bindBuffer(gl.ARRAY_BUFFER, texcoordBuffer);
 	gl.vertexAttribPointer(texcoordLocation, n_dim, gl.FLOAT, false, 0, 0);
-
-	// set the resolution
-	gl.uniform3f(clipspace_scaleLocation, gl.canvas.width, gl.canvas.height, (gl.canvas.width+gl.canvas.height)/2);
 
 	
 	// Draw function
@@ -276,14 +269,25 @@ function render(image_list) {
 		gl.uniform1f(polar_angleLocation, polar_angle);
 		gl.uniform3f(translationLocation, x_translation, y_translation, z_translation);
 
+		
+		// Tell WebGL how to convert from clip space to pixels
+		gl.canvas.width  = window.innerWidth;
+  		gl.canvas.height = window.innerHeight;
+		// set the resolution
+		gl.uniform3f(clipspace_scaleLocation, gl.canvas.width, gl.canvas.height, (gl.canvas.width+gl.canvas.height)/2);
+		
+		gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 		// Draw the rectangle.
 		gl.drawArrays(gl.TRIANGLES, 0, 3*n_tris);
 	}
 
 	
 	// Define animation parameters
-	var n_planes = 60;
+	var n_planes = 100;
 	var speed = 100;
+	var spawn_width = 1000;
+	var spawn_height = 500;
+	var spawn_depth = 1000;
 	// Inits
 	var planeStack = [];
 	for (var i_plane = 0; i_plane < n_planes; i_plane++) planeStack.push(
@@ -291,9 +295,9 @@ function render(image_list) {
 			birthday: 0,
 			azimuthal_angle: 0,
 			polar_angle: 0,
-			x_translation: 1000 * Math.random() - 500,
-			y_translation: 1000 * Math.random() - 500,
-			z_translation: 500 * Math.random()
+			x_translation: 2*spawn_width * Math.random() - spawn_width,
+			y_translation: 2*spawn_height * Math.random() - spawn_height,
+			z_translation: spawn_depth * Math.random()
 		});
 
 
@@ -315,9 +319,9 @@ function render(image_list) {
 			
 			// Move the plane closer
 			i_plane.z_translation -= speed*dt;
-			i_plane.z_translation = (500+i_plane.z_translation) % 500;
-			var z_frac = (1-i_plane.z_translation/500);
-			var alpha = smoothStep(2*z_frac)+smoothStep(2-2*z_frac)-1;
+			i_plane.z_translation = (spawn_depth+i_plane.z_translation) % spawn_depth;
+			var z_frac = (1-i_plane.z_translation/spawn_depth);
+			var alpha = smoothStep(3*z_frac)+smoothStep(2-3*z_frac)-1;
 			
 			drawPlane(
 				i,
