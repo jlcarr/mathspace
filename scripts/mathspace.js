@@ -1,4 +1,4 @@
-// A script for simulating particles with WebGL
+// A script for rendering equations flying though 3D space
 
 // Define globals
 let gl = null;
@@ -270,13 +270,6 @@ function render(image_list) {
 		gl.uniform3f(translationLocation, x_translation, y_translation, z_translation);
 
 		
-		// Tell WebGL how to convert from clip space to pixels
-		gl.canvas.width  = window.innerWidth;
-  		gl.canvas.height = window.innerHeight;
-		// set the resolution
-		gl.uniform3f(clipspace_scaleLocation, gl.canvas.width, gl.canvas.height, (gl.canvas.width+gl.canvas.height)/2);
-		
-		gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 		// Draw the rectangle.
 		gl.drawArrays(gl.TRIANGLES, 0, 3*n_tris);
 	}
@@ -313,6 +306,12 @@ function render(image_list) {
 		
 		// Perform rendering
 		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+		// Tell WebGL how to convert from clip space to pixels
+		gl.canvas.width  = window.innerWidth;
+  		gl.canvas.height = window.innerHeight;
+		// set the resolution
+		gl.uniform3f(clipspace_scaleLocation, gl.canvas.width, gl.canvas.height, (gl.canvas.width+gl.canvas.height)/2);
+		gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 
 		for (var i = 0; i < planeStack.length; i++) {
 			var i_plane = planeStack[i];
